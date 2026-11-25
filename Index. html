@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="theme-color" content="#101827">
+<title>Shankar Sheets</title>
+
+<style>
+:root{
+  --bg:#0b1220;--panel:#142136;--panel2:#1b2b42;
+  --line:#30445d;--gold:#e0b85b;--gold2:#f5d98d;
+  --text:#f4f7fb;--muted:#a7b4c7;--green:#54d6a0;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:radial-gradient(ellipse at top,#1b2b42,#0b1220 60%);
+  color:var(--text);font:14px system-ui,-apple-system,Segoe UI,sans-serif;
+}
+header{
+  position:sticky;top:0;z-index:10;padding:12px;
+  background:#101827ee;backdrop-filter:blur(15px);
+  border-bottom:1px solid var(--line)
+}
+.top{display:flex;align-items:center;gap:10px}
+.logo{
+  width:42px;height:42px;border-radius:13px;
+  display:grid;place-items:center;font-size:23px;font-weight:900;
+  color:#172033;background:linear-gradient(145deg,var(--gold2),#b8862c)
+}
+.brand{flex:1}
+.brand h1{margin:0;color:var(--gold2);font-size:18px}
+.brand small{color:var(--muted)}
+.saved{font-size:11px;color:var(--green)}
+main{max-width:1250px;margin:auto;padding:12px;display:grid;gap:12px}
+.panel{
+  background:linear-gradient(145deg,#152338,#111b2b);
+  border:1px solid var(--line);border-radius:17px;padding:12px;
+  box-shadow:0 12px 30px #0002
+}
+.section-title{font-weight:800;color:var(--gold2);margin-bottom:10px}
+.actions,.toolbar,.templates{display:flex;flex-wrap:wrap;gap:7px}
+.btn,.tool,.template{
+  border:1px solid #394e67;background:#1b2b42;color:var(--text);
+  padding:9px 11px;border-radius:10px;font-weight:700;
+  font-size:12px;cursor:pointer
+}
+.btn:active,.tool:active,.template:active{transform:scale(.98)}
+.btn.primary{background:linear-gradient(135deg,#f0d18a,#c99b43);color:#172033;border:0}
+.btn.danger{color:#ffb2b7}
+.tool.active{background:var(--gold);color:#172033}
+input,select{
+  background:#0d1726;border:1px solid #35465d;color:var(--text);
+  padding:10px;border-radius:10px;min-width:0
+}
+input:focus,select:focus{outline:none;border-color:var(--gold)}
+.sheet-title{width:100%;font-size:16px;font-weight:800}
+.sheetbar{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.muted{color:var(--muted);font-size:12px}
+.toolbar{margin-top:10px}
+.formula-bar{display:grid;grid-template-columns:65px 1fr;gap:7px;margin:10px 0}
+.namebox{text-align:center;font-weight:800;color:var(--gold2)}
+.formula{width:100%}
+.gridwrap{
+  overflow:auto;max-height:65vh;background:#fff;border:1px solid #34465d;
+  border-radius:12px;overscroll-behavior:contain
+}
+table{border-collapse:separate;border-spacing:0;color:#1c2635;font-size:13px}
+th,td{border-right:1px solid #d6dde7;border-bottom:1px solid #d6dde7;
+  min-width:110px;height:38px;padding:0;white-space:nowrap}
+th{position:sticky;top:0;background:#e8edf4;color:#3b4a5e;
+  text-align:center;z-index:2}
+th.rowhead{left:0;z-index:3;min-width:42px;width:42px}
+td.rowhead{position:sticky;left:0;background:#e8edf4;color:#526176;
+  text-align:center;min-width:42px;width:42px;z-index:1;font-weight:700}
+td.cell{background:#fff}
+td.cell.selected{outline:2px solid #c79a3d;outline-offset:-2px}
+td.cell input{
+  width:100%;height:100%;border:0;border-radius:0;
+  background:transparent;color:inherit;padding:8px;font:inherit
+}
+td.cell input:focus{background:#fff8e7;outline:none}
+.status{display:flex;justify-content:space-between;gap:8px;
+  flex-wrap:wrap;color:var(--muted);font-size:11px;margin-top:9px}
+.footer{text-align:center;color:#78889e;font-size:11px;padding:15px}
+hr{border:0;border-top:1px solid var(--line);margin:13px 0}
+@media(min-width:850px){
+  main{grid-template-columns:260px 1fr;align-items:start}
+  .gridwrap{max-height:72vh}
+}
+@media(max-width:480px){
+  main{padding:8px}.panel{padding:10px}
+  .btn,.tool,.template{padding:8px 9px}
+  .gridwrap{max-height:58vh}
+}
+</style>
+</head>
+
+<body>
+<header>
+  <div class="top">
+    <div class="logo">▦</div>
+    <div class="brand">
+      <h1>Shankar Sheets</h1>
+      <small>Your everyday spreadsheet</small>
+    </div>
+    <div class="saved" id="saveState">● Saved</div>
+  </div>
+</header>
+
+<main>
+  <div class="side">
+    <section class="panel">
+      <div class="section-title">WORKBOOK</div>
+      <input id="sheetTitle" class="sheet-title" value="My Daily Sheet">
+
+      <div class="templates" style="margin-top:10px">
+        <button class="template" data-template="blank">＋ Blank</button>
+        <button class="template" data-template="expense">₹ Expense</button>
+        <button class="template" data-template="stock">▤ Stock</button>
+        <button class="template" data-template="work">✓ Work log</button>
+      </div>
+
+      <hr>
+      <div class="section-title">SHEET ACTIONS</div>
+      <div class="actions">
+        <button class="btn" id="addRow">＋ Row</button>
+        <button class="btn" id="addCol">＋ Column</button>
+        <button class="btn" id="delRow">－ Row</button>
+        <button class="btn" id="delCol">－ Column</button>
+        <button class="btn" id="clearSheet">Clear cells</button>
+        <button class="btn" id="newSheet">New sheet</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="section-title">FILES & PRINT</div>
+      <div class="actions">
+        <button class="btn primary" id="exportCsv">⇩ Export CSV</button>
+        <button class="btn" id="importCsv">⇧ Import CSV</button>
+        <button class="btn" id="shareCsv">↗ Share CSV</button>
+        <button class="btn" id="printSheet">▣ Print / PDF</button>
+      </div>
+      <input type="file" id="fileInput" accept=".csv,text/csv" hidden>
+
+      <hr>
+      <div class="section-title">BACKUP & RESTORE</div>
+      <div class="actions">
+        <button class="btn primary" id="backupAll">⇩ Backup JSON</button>
+        <button class="btn" id="restoreAll">⇧ Restore JSON</button>
+      </div>
+      <input type="file" id="backupInput" accept=".json,application/json" hidden>
+
+      <p class="muted">
+        Backup saves your sheet data and formatting into a JSON file.
+        Keep that file in Downloads, Drive, or another safe location.
+      </p>
+      <p class="muted">
+        CSV is for Excel/Google Sheets. JSON backup restores this app's
+        workbook including formatting.
+      </p>
+    </section>
+  </div>
+
+  <section class="panel editor">
+    <div class="sheetbar">
+      <div style="color:var(--gold2);font-weight:800">✦ SHEET</div>
+      <div class="muted" id="dimensions">10 rows × 6 columns</div>
+    </div>
+
+    <div class="toolbar">
+      <button class="tool" id="boldBtn">B</button>
+      <button class="tool" id="italicBtn"><i>I</i></button>
+      <button class="tool" id="alignBtn">⇤ Align</button>
+      <button class="tool" id="colorBtn">▧ Color</button>
+      <button class="tool" id="currencyBtn">₹</button>
+      <button class="tool" id="percentBtn">%</button>
+      <button class="tool" id="sumBtn">Σ SUM</button>
+      <button class="tool" id="undoBtn">↶ Undo</button>
+      <button class="tool" id="redoBtn">↷ Redo</button>
+    </div>
+
+    <div class="formula-bar">
+      <input class="namebox" id="cellName" value="A1" readonly>
+      <input class="formula" id="formulaInput"
+        placeholder="Value or formula: =SUM(B2:B8)">
+    </div>
+
+    <div class="gridwrap">
+      <table id="sheetGrid"></table>
+    </div>
+
+    <div class="status">
+      <span id="selectionStatus">Selected: A1</span>
+      <span>Auto-save on this device</span>
+    </div>
+  </section>
+</main>
+
+<div class="footer">Shankar Sheets • Personal spreadsheet</div>
+
+<script>
+(()=>{
+"use strict";
+
+const $=id=>document.getElementById(id);
+const STORAGE_KEY="shankarSheetsV1";
+
+let rows=10,cols=6,data=[],styles={};
+let selected={r:0,c:0};
+let undoStack=[],redoStack=[];
+
+const colName=n=>{
+  let s="";
+  while(n>=0){
+    s=String.fromCharCode(n%26+65)+s;
+    n=Math.floor(n/26)-1;
+  }
+  return s;
+};
+
+const ref=(r,c)=>colName(c)+(r+1);
+const cellKey=(r,c)=>r+","+c;
+
+function parseRef(s){
+  const m=String(s).toUpperCase().match(/^([A-Z]+)([1-9]\d*)$/);
+  if(!m)return null;
+  let c=0;
+  for(const ch of m[1])c=c*26+ch.charCodeAt(0)-64;
+  return {r:Number(m[2])-1,c:c-1};
+}
+
+function ensureData(){
+  rows=Math.max(1,Math.min(200,rows));
+  cols=Math.max(1,Math.min(40,cols));
+  for(let r=0;r<rows;r++){
+    if(!data[r])data[r]=[];
+    for(let c=0;c<cols;c++){
+      if(data[r][c]===undefined)data[r][c]="";
+    }
+  }
+  data=data.slice(0,rows).map(row=>row.slice(0,cols));
+}
+
+function currentState(){
+  return JSON.stringify({rows,cols,data,styles,selected});
+}
+
+function snapshot(){
+  undoStack.push(currentState());
+  if(undoStack.length>40)undoStack.shift();
+  redoStack=[];
+  updateUndo();
+}
+
+function persist(){
+  try{
+    localStorage.setItem(STORAGE_KEY,JSON.stringify({
+      rows,cols,data,styles,title:$("sheetTitle").value
+    }));
+    $("saveState").textContent="● Saved";
+  }catch(e){
+    $("saveState").textContent="● Storage full";
+  }
+}
+
+function loadSaved(){
+  try{
+    const s=JSON.parse(localStorage.getItem(STORAGE_KEY)||"null");
+    if(s){
+      rows=Number(s.rows)||10;
+      cols=Number(s.cols)||6;
+      data=s.data||[];
+      styles=s.styles||{};
+      $("sheetTitle").value=s.title||"My Daily Sheet";
+    }
+  }catch(e){}
+  ensureData();
+}
+
+function updateUndo(){
+  $("undoBtn").disabled=!undoStack.length;
+  $("redoBtn").disabled=!redoStack.length;
+}
+
+function rawValue(r,c){
+  return data[r]?.[c]??"";
+}
+
+function numberValue(v){
+  const n=Number(v);
+  return v!==""&&Number.isFinite(n)?n:0;
+}
+
+function calculate(r,c,seen=new Set()){
+  const raw=String(rawValue(r,c));
+  if(!raw.startsWith("="))return raw;
+
+  const id=cellKey(r,c);
+  if(seen.has(id))return "#CYCLE!";
+  seen.add(id);
+
+  let expression=raw.slice(1).toUpperCase();
+
+  expression=expression.replace(
+    /(SUM|AVERAGE|MIN|MAX|COUNT)\(([^()]*)\)/g,
+    (whole,fn,args)=>{
+      const values=[];
+
+      args.split(",").forEach(part=>{
+        part=part.trim();
+
+        if(part.includes(":")){
+          const pair=part.split(":").map(parseRef);
+          if(!pair[0]||!pair[1])return;
+
+          const a=pair[0],b=pair[1];
+          for(let rr=Math.min(a.r,b.r);rr<=Math.max(a.r,b.r);rr++){
+            for(let cc=Math.min(a.c,b.c);cc<=Math.max(a.c,b.c);cc++){
+              values.push(numberValue(calculate(rr,cc,new Set(seen))));
+            }
+          }
+        }else{
+          const p=parseRef(part);
+          if(p)values.push(numberValue(calculate(p.r,p.c,new Set(seen))));
+          else values.push(numberValue(part));
+        }
+      });
+
+      if(fn==="SUM")return values.reduce((a,b)=>a+b,0);
+      if(fn==="AVERAGE")return values.length?
+        values.reduce((a,b)=>a+b,0)/values.length:0;
+      if(fn==="MIN")return values.length?Math.min(...values):0;
+      if(fn==="MAX")return values.length?Math.max(...values):0;
+      if(fn==="COUNT")return values.length;
+      return 0;
+    }
+  );
+
+  expression=expression.replace(/\b([A-Z]+[1-9]\d*)\b/g,match=>{
+    const p=parseRef(match);
+    return p?numberValue(calculate(p.r,p.c,new Set(seen))):match;
+  });
+
+  if(!/^[\d+\-*/().\s%]+$/.test(expression))return "#ERROR";
+
+  try{
+    const result=Function('"use strict";return ('+
+      expression.replace(/%/g,"/100")+");")();
+    return Number.isFinite(result)?
+      String(Math.round(result*1e8)/1e8):"#ERROR";
+  }catch(e){
+    return "#ERROR";
+  }
+}
+
+function shownValue(r,c){
+  const v=rawValue(r,c);
+  return String(v).startsWith("=")?calculate(r,c):v;
+}
+
+function render(){
+  ensureData();
+  const table=$("sheetGrid");
+  table.innerHTML="";
+
+  const header=document.createElement("tr");
+  const corner=document.createElement("th");
+  corner.className="rowhead";
+  header.append(corner);
+
+  for(let c=0;c<cols;c++){
+    const th=document.createElement("th");
+    th.textContent=colName(c);
+    header.append(th);
+  }
+  table.append(header);
+
+  for(let r=0;r<rows;r++){
+    const tr=document.createElement("tr");
+    const rowHead=document.createElement("td");
+    rowHead.className="rowhead";
+    rowHead.textContent=r+1;
+    tr.append(rowHead);
+
+    for(let c=0;c<cols;c++){
+      const td=document.createElement("td");
+      td.className="cell";
+
+      const k=cellKey(r,c),style=styles[k]||{};
+      if(style.bold)td.style.fontWeight="800";
+      if(style.italic)td.style.fontStyle="italic";
+      if(style.bg)td.style.background=style.bg;
+      if(style.color)td.style.color=style.color;
+      if(style.align)td.style.textAlign=style.align;
+      if(selected.r===r&&selected.c===c)td.classList.add("selected");
+
+      const input=document.createElement("input");
+      input.value=shownValue(r,c);
+      input.dataset.r=r;
+      input.dataset.c=c;
+      input.setAttribute("aria-label",ref(r,c));
+      input.spellcheck=false;
+
+      input.addEventListener("focus",()=>selectCell(r,c));
+      input.addEventListener("change",()=>{
+        snapshot();
+        data[r][c]=input.value;
+        render();
+        persist();
+      });
+
+      input.addEventListener("keydown",e=>{
+        if(e.key==="Enter"){
+          e.preventDefault();
+          selectCell(Math.min(rows-1,r+1),c);
+          focusSelected();
+        }
+        if(e.key==="Tab"){
+          e.preventDefault();
+          selectCell(r,Math.min(cols-1,c+1));
+          focusSelected();
+        }
+      });
+
+      td.append(input);
+      tr.append(td);
+    }
+    table.append(tr);
+  }
+
+  $("dimensions").textContent=rows+" rows × "+cols+" columns";
+  $("cellName").value=ref(selected.r,selected.c);
+  $("formulaInput").value=rawValue(selected.r,selected.c);
+  $("selectionStatus").textContent="Selected: "+ref(selected.r,selected.c);
+  updateUndo();
+}
+
+function selectCell(r,c){
+  selected={r,c};
+  $("cellName").value=ref(r,c);
+  $("formulaInput").value=rawValue(r,c);
+  $("selectionStatus").textContent=
+    "Selected: "+ref(r,c)+" · Value: "+shownValue(r,c);
+
+  document.querySelectorAll("td.cell").forEach((td,i)=>{
+    td.classList.toggle("selected",
+      Math.floor(i/cols)===r&&i%cols===c);
+  });
+}
+
+function focusSelected(){
+  const input=document.querySelector(
+    'input[data-r="'+selected.r+'"][data-c="'+selected.c+'"]'
+  );
+  if(input)input.focus();
+}
+
+$("formulaInput").addEventListener("change",()=>{
+  snapshot();
+  data[selected.r][selected.c]=$("formulaInput").value;
+  render();
+  persist();
+  focusSelected();
+});
+
+$("addRow").onclick=()=>{
+  snapshot();rows=Math.min(200,rows+1);
+  ensureData();render();persist();
+};
+
+$("addCol").onclick=()=>{
+  snapshot();cols=Math.min(40,cols+1);
+  ensureData();render();persist();
+};
+
+$("delRow").onclick=()=>{
+  if(rows<=1)return;
+  snapshot();data.splice(selected.r,1);rows--;
+  selected.r=Math.min(selected.r,rows-1);
+  render();persist();
+};
+
+$("delCol").onclick=()=>{
+  if(cols<=1)return;
+  snapshot();data.forEach(row=>row.splice(selected.c,1));cols--;
+  selected.c=Math.min(selected.c,cols-1);
+  render();persist();
+};
+
+$("clearSheet").onclick=()=>{
+  if(!confirm("Clear all cell contents?"))return;
+  snapshot();
+  data=Array.from({length:rows},()=>Array(cols).fill(""));
+  render();persist();
+};
+
+$("newSheet").onclick=()=>{
+  if(!confirm("Replace current sheet with a new blank sheet?"))return;
+  snapshot();
+  rows=10;cols=6;data=[];styles={};selected={r:0,c:0};
+  $("sheetTitle").value="New Sheet";
+  ensureData();render();persist();
+};
+
+document.querySelectorAll("[data-template]").forEach(button=>{
+  button.onclick=()=>{
+    snapshot();
+    styles={};selected={r:0,c:0};
+    const type=button.dataset.template;
+
+    if(type==="expense"){
+      rows=15;cols=5;
+      data=[["Date","Description","Category","Income (₹)","Expense (₹)"],
+        ...Array.from({length:14},()=>["","","","",""])];
+      $("sheetTitle").value="Daily Expenses";
+    }else if(type==="stock"){
+      rows=15;cols=6;
+      data=[["Item","Opening","Purchased","Sold","Balance","Price (₹)"],
+        ...Array.from({length:14},()=>["","","","","",""])];
+      $("sheetTitle").value="Stock Register";
+    }else if(type==="work"){
+      rows=15;cols=5;
+      data=[["Date","Task","Priority","Status","Notes"],
+        ...Array.from({length:14},()=>["","","","",""])];
+      $("sheetTitle").value="Daily Work Log";
+    }else{
+      rows=10;cols=6;data=[];
+      $("sheetTitle").value="My Daily Sheet";
+    }
+
+    ensureData();render();persist();
+  };
+});
+
+function formatCell(prop){
+  snapshot();
+  const k=cellKey(selected.r,selected.c);
+  styles[k]=styles[k]||{};
+  styles[k][prop]=!styles[k][prop];
+  render();persist();
+}
+
+$("boldBtn").onclick=()=>formatCell("bold");
+$("italicBtn").onclick=()=>formatCell("italic");
+
+$("alignBtn").onclick=()=>{
+  snapshot();
+  const k=cellKey(selected.r,selected.c);
+  styles[k]=styles[k]||{};
+  styles[k].align=styles[k].align==="center"?"left":"center";
+  render();persist();
+};
+
+$("colorBtn").onclick=()=>{
+  snapshot();
+  const k=cellKey(selected.r,selected.c);
+  styles[k]=styles[k]||{};
+  styles[k].bg=styles[k].bg?"":"#fff1c9";
+  render();persist();
+};
+
+$("currencyBtn").onclick=()=>{
+  snapshot();
+  data[selected.r][selected.c]="₹"+shownValue(selected.r,selected.c);
+  render();persist();
+};
+
+$("percentBtn").onclick=()=>{
+  snapshot();
+  data[selected.r][selected.c]=
+    String(numberValue(shownValue(selected.r,selected.c))*100)+"%";
+  render();persist();
+};
+
+$("sumBtn").onclick=()=>{
+  snapshot();
+  const r=selected.r,c=selected.c;
+  const last=Math.max(0,r-1);
+  data[r][c]="=SUM("+ref(0,c)+":"+ref(last,c)+")";
+  render();persist();
+};
+
+$("undoBtn").onclick=()=>{
+  if(!undoStack.length)return;
+  redoStack.push(currentState());
+  const s=JSON.parse(undoStack.pop());
+  rows=s.rows;cols=s.cols;data=s.data;styles=s.styles;selected=s.selected;
+  render();persist();
+};
+
+$("redoBtn").onclick=()=>{
+  if(!redoStack.length)return;
+  undoStack.push(currentState());
+  const s=JSON.parse(redoStack.pop());
+  rows=s.rows;cols=s.cols;data=s.data;styles=s.styles;selected=s.selected;
+  render();persist();
+};
+
+function csvEscape(value){
+  const s=String(value??"");
+  return /[",\n\r]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;
+}
+
+function csvText(){
+  return data.slice(0,rows).map(row=>
+    Array.from({length:cols},(_,c)=>csvEscape(row[c]??"")).join(",")
+  ).join("\r\n");
+}
+
+function safeFilename(name){
+  return (name||"sheet").replace(/[\\/:*?"<>|]/g,"_");
+}
+
+function downloadFile(name,content,type){
+  const blob=new Blob([content],{type});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;a.download=name;
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1500);
+}
+
+$("exportCsv").onclick=()=>{
+  downloadFile(safeFilename($("sheetTitle").value)+".csv",
+    csvText(),"text/csv;charset=utf-8");
+};
+
+$("shareCsv").onclick=async()=>{
+  const name=safeFilename($("sheetTitle").value)+".csv";
+  const file=new File([csvText()],name,{type:"text/csv"});
+  if(navigator.share&&navigator.canShare?.({files:[file]})){
+    try{await navigator.share({files:[file],title:$("sheetTitle").value});}
+    catch(e){}
+  }else{
+    downloadFile(name,csvText(),"text/csv;charset=utf-8");
+  }
+};
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g,ch=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[ch]));
+}
+
+function printableTable(){
+  let html="<table><tr>";
+  for(let c=0;c<cols;c++)html+="<th>"+colName(c)+"</th>";
+  html+="</tr>";
+
+  for(let r=0;r<rows;r++){
+    html+="<tr>";
+    for(let c=0;c<cols;c++){
+      html+="<td>"+escapeHtml(shownValue(r,c))+"</td>";
+    }
+    html+="</tr>";
+  }
+  return html+"</table>";
+}
+
+$("printSheet").onclick=()=>{
+  const w=window.open("","_blank");
+  if(!w){alert("Allow pop-ups to open print preview.");return;}
+
+  w.document.write(
+    "<html><head><title>Print Sheet</title><style>"+
+    "body{font:12px Arial;padding:18px}"+
+    "table{border-collapse:collapse;width:100%}"+
+    "td,th{border:1px solid #888;padding:6px;word-break:break-word}"+
+    "th{background:#eee}</style></head><body><h2>"+
+    escapeHtml($("sheetTitle").value)+"</h2>"+
+    printableTable()+
+    "<script>window.onload=()=>window.print()<\\/script></body></html>"
+  
